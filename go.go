@@ -78,3 +78,7 @@ func GoWithClient(client *http.Client, method Method, url string, header Header,
 
 	return r, nil
 }
+
+func Get(url string, header Header, result any) (*Response, error) {
+	return Go(GET, url, header, nil, result)
+}
