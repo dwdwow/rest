@@ -28,6 +28,10 @@ type Response struct {
 	RespBodyCloseErr error
 }
 
+func Go(method Method, url string, header Header, body io.Reader, result any) (*Response, error) {
+	return GoWithClient(http.DefaultClient, method, url, header, body, result)
+}
+
 func GoWithClient(client *http.Client, method Method, url string, header Header, body io.Reader, result any) (*Response, error) {
 	if client == nil {
 		return nil, fmt.Errorf("rest: client is nil")
