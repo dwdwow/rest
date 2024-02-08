@@ -16,6 +16,8 @@ const (
 	DELETE Method = "DELETE"
 )
 
+const minStatusCode = 399
+
 type Header map[string]string
 
 type Response struct {
@@ -46,20 +48,22 @@ func GoWithClient(client *http.Client, method Method, url string, header Header,
 		Request: req,
 	}
 
-	resp, err := client.Do(req)
+	r.Raw, err = client.Do(req)
 	if err != nil {
 		return r, err
 	}
 	defer func() {
-		r.RespBodyCloseErr = resp.Body.Close()
+		r.RespBodyCloseErr = r.Raw.Body.Close()
 	}()
 
-	r.Data, err = io.ReadAll(resp.Body)
+	if r.Raw.StatusCode > minStatusCode {
+		return r, fmt.Errorf("rest: status %v > %v", r.Raw.StatusCode, minStatusCode)
+	}
+
+	r.Data, err = io.ReadAll(r.Raw.Body)
 	if err != nil {
 		return r, fmt.Errorf("rest: can not read response body, err: %w", err)
 	}
-
-	r.Raw = resp
 
 	if result != nil && r.Data != nil {
 		err = json.Unmarshal(r.Data, result)
