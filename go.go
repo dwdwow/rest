@@ -21,8 +21,11 @@ const minStatusCode = 399
 
 type Header map[string]string
 
-// Body must be a map, struct and string.
+// Body must be a map, struct or string.
 type Body any
+
+// Result must be a map, or a pointer to a struct or string
+type Result any
 
 type Response struct {
 	Raw     *http.Response
@@ -32,11 +35,11 @@ type Response struct {
 	RespBodyCloseErr error
 }
 
-func Go(method Method, url string, header Header, body io.Reader, result any) (*Response, error) {
+func Go(method Method, url string, header Header, body Body, result Result) (*Response, error) {
 	return GoWithClient(http.DefaultClient, method, url, header, body, result)
 }
 
-func GoWithClient(client *http.Client, method Method, url string, header Header, body Body, result any) (*Response, error) {
+func GoWithClient(client *http.Client, method Method, url string, header Header, body Body, result Result) (*Response, error) {
 	if client == nil {
 		return nil, fmt.Errorf("rest: client is nil")
 	}
@@ -46,7 +49,7 @@ func GoWithClient(client *http.Client, method Method, url string, header Header,
 		return nil, fmt.Errorf("reset: marshal body to bytes, err: %w", err)
 	}
 
-	req, err := http.NewRequest(string(method), url, bytes.NewBuffer(bd))
+	req, err := http.NewRequest(string(method), url, bytes.NewReader(bd))
 	if err != nil {
 		return nil, fmt.Errorf("rest: can not new request, err: %w", err)
 	}
@@ -88,6 +91,18 @@ func GoWithClient(client *http.Client, method Method, url string, header Header,
 	return r, nil
 }
 
-func Get(url string, header Header, result any) (*Response, error) {
+func Get(url string, header Header, result Result) (*Response, error) {
 	return Go(GET, url, header, nil, result)
+}
+
+func Post(url string, header Header, body Body, result Result) (*Response, error) {
+	return Go(POST, url, header, body, result)
+}
+
+func Put(url string, header Header, body Body, result Result) (*Response, error) {
+	return Go(PUT, url, header, body, result)
+}
+
+func Delete(url string, header Header, result Result) (*Response, error) {
+	return Go(DELETE, url, header, nil, result)
 }
