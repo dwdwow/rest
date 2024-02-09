@@ -35,11 +35,11 @@ type Response struct {
 	RespBodyCloseErr error
 }
 
-func Go(method Method, url string, header Header, body Body, result Result) (*Response, error) {
-	return GoWithClient(http.DefaultClient, method, url, header, body, result)
+func Do(method Method, url string, header Header, body Body, result Result) (*Response, error) {
+	return DoWithClient(http.DefaultClient, method, url, header, body, result)
 }
 
-func GoWithClient(client *http.Client, method Method, url string, header Header, body Body, result Result) (*Response, error) {
+func DoWithClient(client *http.Client, method Method, url string, header Header, body Body, result Result) (*Response, error) {
 	if client == nil {
 		return nil, fmt.Errorf("rest: client is nil")
 	}
@@ -92,17 +92,17 @@ func GoWithClient(client *http.Client, method Method, url string, header Header,
 }
 
 func Get(url string, header Header, result Result) (*Response, error) {
-	return Go(GET, url, header, nil, result)
+	return Do(GET, url, header, nil, result)
 }
 
 func Post(url string, header Header, body Body, result Result) (*Response, error) {
-	return Go(POST, url, header, body, result)
+	return Do(POST, url, header, body, result)
 }
 
 func Put(url string, header Header, body Body, result Result) (*Response, error) {
-	return Go(PUT, url, header, body, result)
+	return Do(PUT, url, header, body, result)
 }
 
 func Delete(url string, header Header, result Result) (*Response, error) {
-	return Go(DELETE, url, header, nil, result)
+	return Do(DELETE, url, header, nil, result)
 }
