@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,6 +21,9 @@ const minStatusCode = 399
 
 type Header map[string]string
 
+// Body must be a map, struct and string.
+type Body any
+
 type Response struct {
 	Raw     *http.Response
 	Request *http.Request
@@ -32,12 +36,17 @@ func Go(method Method, url string, header Header, body io.Reader, result any) (*
 	return GoWithClient(http.DefaultClient, method, url, header, body, result)
 }
 
-func GoWithClient(client *http.Client, method Method, url string, header Header, body io.Reader, result any) (*Response, error) {
+func GoWithClient(client *http.Client, method Method, url string, header Header, body Body, result any) (*Response, error) {
 	if client == nil {
 		return nil, fmt.Errorf("rest: client is nil")
 	}
 
-	req, err := http.NewRequest(string(method), url, body)
+	bd, err := json.Marshal(body)
+	if err != nil {
+		return nil, fmt.Errorf("reset: marshal body to bytes, err: %w", err)
+	}
+
+	req, err := http.NewRequest(string(method), url, bytes.NewBuffer(bd))
 	if err != nil {
 		return nil, fmt.Errorf("rest: can not new request, err: %w", err)
 	}
